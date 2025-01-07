@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brenda's Loose Thoughts</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <h1>Brenda's Loose Thoughts</h1>
+        <div class="upload-section">
+            <input type="file" id="imageInput" accept="image/*" multiple>
+            <button id="uploadBtn">Upload Images</button>
+        </div>
+        <div id="status"></div>
+        <div id="notes"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        // Environment Variables
+        window.env = {
+            OPENAI_API_KEY: '<%- process.env.OPENAI_API_KEY %>',
+            SUPABASE_URL: '<%- process.env.SUPABASE_URL %>',
+            SUPABASE_ANON_KEY: '<%- process.env.SUPABASE_ANON_KEY %>',
+            MODEL_NAME: '<%- process.env.MODEL_NAME %>'
+        };
+    </script>
+    <script type="module" src="app.js"></script>
+</body>
+</html>
