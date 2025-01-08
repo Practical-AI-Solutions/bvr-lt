@@ -7,6 +7,11 @@ marked.setOptions({
     mangle: false
 });
 
+// Add heic2any library for HEIC conversion
+const heicScript = document.createElement('script');
+heicScript.src = 'https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js';
+document.head.appendChild(heicScript);
+
 document.addEventListener('DOMContentLoaded', () => {
     const imageInput = document.getElementById('imageInput');
     const status = document.getElementById('status');
@@ -68,38 +73,69 @@ document.addEventListener('DOMContentLoaded', () => {
         handleFiles(files);
     }
 
-    function handleFiles(files) {
+    async function handleFiles(files) {
         // Don't clear previous files, append new ones
         const startIndex = selectedFiles.length;
+        status.textContent = 'Processing files...';
         
-        files.forEach((file, index) => {
-            selectedFiles.push(file);
-            
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const previewItem = document.createElement('div');
-                previewItem.className = 'preview-item';
-                previewItem.innerHTML = `
-                    <img src="${e.target.result}" alt="Preview ${startIndex + index + 1}">
-                    <button class="remove-btn" data-index="${startIndex + index}">×</button>
-                `;
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            try {
+                let processedFile = file;
                 
-                previewItem.querySelector('.remove-btn').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const removeIndex = parseInt(e.target.dataset.index);
-                    selectedFiles = selectedFiles.filter((_, i) => i !== removeIndex);
-                    previewItem.remove();
-                    // Reindex remaining items
-                    document.querySelectorAll('.preview-item').forEach((item, i) => {
-                        item.querySelector('.remove-btn').dataset.index = i;
+                // Convert HEIC/HEIF to JPEG if needed
+                if (file.type === '' || file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')) {
+                    status.textContent = `Converting ${file.name} to JPEG...`;
+                    try {
+                        const blob = await heic2any({
+                            blob: file,
+                            toType: 'image/jpeg',
+                            quality: 0.8
+                        });
+                        processedFile = new File([blob], file.name.replace(/\.(heic|heif)$/i, '.jpg'), {
+                            type: 'image/jpeg'
+                        });
+                    } catch (convError) {
+                        console.error('HEIC conversion error:', convError);
+                        status.textContent = `Error converting ${file.name}. Skipping...`;
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        continue;
+                    }
+                }
+                
+                selectedFiles.push(processedFile);
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const previewItem = document.createElement('div');
+                    previewItem.className = 'preview-item';
+                    previewItem.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview ${startIndex + selectedFiles.length}">
+                        <button class="remove-btn" data-index="${selectedFiles.length - 1}">×</button>
+                    `;
+                    
+                    previewItem.querySelector('.remove-btn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const removeIndex = parseInt(e.target.dataset.index);
+                        selectedFiles = selectedFiles.filter((_, i) => i !== removeIndex);
+                        previewItem.remove();
+                        // Reindex remaining items
+                        document.querySelectorAll('.preview-item').forEach((item, i) => {
+                            item.querySelector('.remove-btn').dataset.index = i;
+                        });
+                        updateButtons();
                     });
-                    updateButtons();
-                });
+                    
+                    imagePreview.appendChild(previewItem);
+                };
+                reader.readAsDataURL(processedFile);
                 
-                imagePreview.appendChild(previewItem);
-            };
-            reader.readAsDataURL(file);
-        });
+            } catch (error) {
+                console.error('Error processing file:', error);
+                status.textContent = `Error processing ${file.name}. Skipping...`;
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+        }
 
         updateButtons();
         const totalFiles = selectedFiles.length;
