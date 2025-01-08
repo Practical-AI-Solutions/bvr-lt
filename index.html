@@ -10,10 +10,14 @@
     <div id="app">
         <h1>Brenda's Loose Thoughts</h1>
         <div class="upload-section">
-            <input type="file" id="imageInput" accept="image/*" multiple>
-            <button id="uploadBtn">Upload Images</button>
+            <div class="upload-controls">
+                <input type="file" id="imageInput" accept="image/*" multiple>
+                <button id="uploadBtn" class="primary-btn">Select Images</button>
+                <button id="processBtn" class="secondary-btn" disabled>Process Images (0)</button>
+            </div>
+            <div id="imagePreview" class="image-preview"></div>
+            <div id="status" class="status"></div>
         </div>
-        <div id="status"></div>
         <div id="notes"></div>
     </div>
 

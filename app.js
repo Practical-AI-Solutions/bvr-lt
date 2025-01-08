@@ -12,21 +12,69 @@ document.addEventListener('DOMContentLoaded', () => {
     const status = document.getElementById('status');
     const notes = document.getElementById('notes');
     const uploadBtn = document.getElementById('uploadBtn');
+    const processBtn = document.getElementById('processBtn');
+    const imagePreview = document.getElementById('imagePreview');
+    
+    let selectedFiles = [];
 
     // Load existing notes on startup
     loadNotes();
 
     uploadBtn.addEventListener('click', () => imageInput.click());
+    processBtn.addEventListener('click', processSelectedImages);
 
-    async function handleUpload(event) {
-        const files = event.target.files;
+    function updateProcessButton() {
+        processBtn.disabled = selectedFiles.length === 0;
+        processBtn.textContent = `Process Images (${selectedFiles.length})`;
+    }
+
+    function handleFileSelect(event) {
+        const files = Array.from(event.target.files);
         if (!files.length) return;
+
+        // Clear previous files
+        selectedFiles = [];
+        imagePreview.innerHTML = '';
         
+        files.forEach((file, index) => {
+            if (!file.type.startsWith('image/')) return;
+            
+            selectedFiles.push(file);
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const previewItem = document.createElement('div');
+                previewItem.className = 'preview-item';
+                previewItem.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview ${index + 1}">
+                    <button class="remove-btn" data-index="${index}">×</button>
+                `;
+                
+                previewItem.querySelector('.remove-btn').addEventListener('click', () => {
+                    selectedFiles = selectedFiles.filter((_, i) => i !== index);
+                    previewItem.remove();
+                    updateProcessButton();
+                });
+                
+                imagePreview.appendChild(previewItem);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        updateProcessButton();
+        status.textContent = 'Images selected. Click Process to begin.';
+    }
+
+    async function processSelectedImages() {
+        if (!selectedFiles.length) return;
+        
+        processBtn.disabled = true;
         uploadBtn.disabled = true;
+        let processed = 0;
         
-        for (const file of files) {
+        for (const file of selectedFiles) {
             try {
-                status.textContent = `Processing ${file.name}...`;
+                status.textContent = `Processing ${file.name}... (${processed + 1}/${selectedFiles.length})`;
                 console.log(`Processing ${file.name}`);
 
                 const base64 = await fileToBase64(file);
@@ -39,15 +87,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('Note saved to database');
 
                 addNoteToUI(noteData);
-                status.textContent = 'Done!';
+                processed++;
             } catch (err) {
                 console.error('Error:', err);
-                status.textContent = `Error: ${err.message}`;
+                status.textContent = `Error processing ${file.name}: ${err.message}`;
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Pause to show error
             }
         }
         
+        // Reset UI
+        selectedFiles = [];
+        imagePreview.innerHTML = '';
+        processBtn.disabled = true;
         uploadBtn.disabled = false;
         imageInput.value = '';
+        status.textContent = `Completed processing ${processed} images!`;
+        updateProcessButton();
     }
 
     async function loadNotes() {
@@ -123,5 +178,5 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    imageInput.addEventListener('change', handleUpload);
+    imageInput.addEventListener('change', handleFileSelect);
 });
