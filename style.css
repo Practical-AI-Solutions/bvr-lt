@@ -5,8 +5,8 @@
     --text-color: #2c3e50;
     --background-color: #F8F7FF;
     --card-background: #ffffff;
-    --tag-text-color: #663399;
-    --tag-bg-color: #FFD700;
+    --tag-text-color: #000000;
+    --tag-bg-color: #FFB700;
     --border-radius: 8px;
     --spacing: 20px;
 }
@@ -175,8 +175,9 @@ button:disabled {
     color: var(--tag-text-color);
     padding: 4px 12px;
     border-radius: 12px;
-    font-weight: 600;
+    font-weight: 700;
     border: 1px solid var(--primary-color);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
 /* Responsive adjustments */
