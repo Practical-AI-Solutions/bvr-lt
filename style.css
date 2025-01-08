@@ -372,3 +372,51 @@ button:disabled {
 .danger-btn:hover:not(:disabled) {
     background: #c0392b;  /* Darker red on hover */
 }
+
+.note-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.note:hover .note-actions {
+    opacity: 1;
+}
+
+.action-btn {
+    background: transparent;
+    border: none;
+    color: var(--primary-color);
+    font-size: 1.2rem;
+    padding: 5px;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: all 0.2s ease;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.action-btn:hover {
+    opacity: 1;
+    background-color: rgba(102, 51, 153, 0.1);
+    transform: scale(1.1);
+}
+
+.action-btn.reading {
+    color: var(--tag-bg-color);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}

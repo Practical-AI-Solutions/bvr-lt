@@ -1,5 +1,6 @@
 import { processImageWithGPT4 } from './services/openai.js';
 import { saveNote, getAllNotes, deleteNote } from './services/supabase.js';
+import { readText } from './services/elevenlabs.js';
 
 // Configure marked for safe rendering
 marked.setOptions({
@@ -205,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function addNoteToUI(note) {
         const noteDiv = document.createElement('div');
         noteDiv.className = 'note';
-        noteDiv.dataset.noteId = note.id;  // Store the note ID
+        noteDiv.dataset.noteId = note.id;
 
         const contentDiv = document.createElement('div');
         contentDiv.className = 'note-content';
@@ -228,9 +229,45 @@ document.addEventListener('DOMContentLoaded', () => {
             metadataDiv.appendChild(yearSpan);
         }
 
+        // Add actions container
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'note-actions';
+
+        // Add read button
+        const readBtn = document.createElement('button');
+        readBtn.className = 'action-btn';
+        readBtn.innerHTML = '🔊';
+        readBtn.title = 'Read note';
+        readBtn.onclick = async (e) => {
+            e.stopPropagation();
+            const allReadButtons = document.querySelectorAll('.action-btn');
+            allReadButtons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.remove('reading');
+            });
+            readBtn.classList.add('reading');
+            
+            try {
+                // Strip markdown and clean up the text
+                const cleanText = note.content
+                    .replace(/[#*_>`]/g, '') // Remove markdown symbols
+                    .replace(/\n+/g, ' ') // Replace newlines with spaces
+                    .trim();
+                
+                await readText(cleanText);
+            } catch (error) {
+                console.error('Failed to read note:', error);
+                alert('Failed to read note. Please try again.');
+            } finally {
+                allReadButtons.forEach(btn => btn.disabled = false);
+                readBtn.classList.remove('reading');
+            }
+        };
+        actionsDiv.appendChild(readBtn);
+
         // Add delete button
         const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'delete-btn';
+        deleteBtn.className = 'action-btn';
         deleteBtn.innerHTML = '🗑️';
         deleteBtn.title = 'Delete note';
         deleteBtn.onclick = async (e) => {
@@ -245,10 +282,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         };
+        actionsDiv.appendChild(deleteBtn);
 
         noteDiv.appendChild(contentDiv);
         noteDiv.appendChild(metadataDiv);
-        noteDiv.appendChild(deleteBtn);
+        noteDiv.appendChild(actionsDiv);
 
         notes.prepend(noteDiv);
     }
