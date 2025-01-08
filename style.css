@@ -299,3 +299,76 @@ button:disabled {
         width: 100%;
     }
 }
+
+.drop-zone {
+    border: 3px dashed var(--primary-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing);
+    transition: all 0.3s ease;
+    background: var(--card-background);
+}
+
+.drop-zone.drag-over {
+    background: rgba(102, 51, 153, 0.1);
+    transform: scale(1.02);
+    border-color: var(--accent-color);
+}
+
+.drop-zone-content {
+    text-align: center;
+    margin-bottom: var(--spacing);
+}
+
+.drop-text {
+    color: var(--primary-color);
+    margin-top: 10px;
+    font-size: 1.1rem;
+    opacity: 0.8;
+}
+
+.upload-controls {
+    display: flex;
+    gap: var(--spacing);
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+/* Update existing image preview styles */
+.image-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: var(--spacing);
+    min-height: 100px; /* Minimum height for empty state */
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+    .upload-controls {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .upload-controls button {
+        width: 100%;
+    }
+
+    .drop-zone {
+        padding: calc(var(--spacing) / 2);
+    }
+}
+
+.danger-btn {
+    background: #e74c3c;  /* Red color for danger */
+    color: white;
+}
+
+.danger-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.danger-btn:hover:not(:disabled) {
+    background: #c0392b;  /* Darker red on hover */
+}

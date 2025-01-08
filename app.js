@@ -13,32 +13,66 @@ document.addEventListener('DOMContentLoaded', () => {
     const notes = document.getElementById('notes');
     const uploadBtn = document.getElementById('uploadBtn');
     const processBtn = document.getElementById('processBtn');
+    const clearBtn = document.getElementById('clearBtn');
     const imagePreview = document.getElementById('imagePreview');
+    const dropZone = document.getElementById('dropZone');
     
     let selectedFiles = [];
 
     // Load existing notes on startup
     loadNotes();
 
+    // Setup event listeners
     uploadBtn.addEventListener('click', () => imageInput.click());
     processBtn.addEventListener('click', processSelectedImages);
+    clearBtn.addEventListener('click', clearAllFiles);
+    imageInput.addEventListener('change', handleFileSelect);
 
-    function updateProcessButton() {
-        processBtn.disabled = selectedFiles.length === 0;
-        processBtn.textContent = `Process Images (${selectedFiles.length})`;
+    // Drag and drop event listeners
+    dropZone.addEventListener('dragenter', handleDragEnter);
+    dropZone.addEventListener('dragover', handleDragOver);
+    dropZone.addEventListener('dragleave', handleDragLeave);
+    dropZone.addEventListener('drop', handleDrop);
+
+    function handleDragEnter(e) {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+    }
+
+    function handleDragLeave(e) {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        
+        const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+        if (files.length === 0) {
+            status.textContent = 'Please drop image files only.';
+            return;
+        }
+        
+        handleFiles(files);
     }
 
     function handleFileSelect(event) {
-        const files = Array.from(event.target.files);
-        if (!files.length) return;
+        const files = Array.from(event.target.files).filter(file => file.type.startsWith('image/'));
+        if (files.length === 0) return;
+        handleFiles(files);
+    }
 
-        // Clear previous files
-        selectedFiles = [];
-        imagePreview.innerHTML = '';
+    function handleFiles(files) {
+        // Don't clear previous files, append new ones
+        const startIndex = selectedFiles.length;
         
         files.forEach((file, index) => {
-            if (!file.type.startsWith('image/')) return;
-            
             selectedFiles.push(file);
             
             const reader = new FileReader();
@@ -46,14 +80,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 const previewItem = document.createElement('div');
                 previewItem.className = 'preview-item';
                 previewItem.innerHTML = `
-                    <img src="${e.target.result}" alt="Preview ${index + 1}">
-                    <button class="remove-btn" data-index="${index}">×</button>
+                    <img src="${e.target.result}" alt="Preview ${startIndex + index + 1}">
+                    <button class="remove-btn" data-index="${startIndex + index}">×</button>
                 `;
                 
-                previewItem.querySelector('.remove-btn').addEventListener('click', () => {
-                    selectedFiles = selectedFiles.filter((_, i) => i !== index);
+                previewItem.querySelector('.remove-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const removeIndex = parseInt(e.target.dataset.index);
+                    selectedFiles = selectedFiles.filter((_, i) => i !== removeIndex);
                     previewItem.remove();
-                    updateProcessButton();
+                    // Reindex remaining items
+                    document.querySelectorAll('.preview-item').forEach((item, i) => {
+                        item.querySelector('.remove-btn').dataset.index = i;
+                    });
+                    updateButtons();
                 });
                 
                 imagePreview.appendChild(previewItem);
@@ -61,8 +101,16 @@ document.addEventListener('DOMContentLoaded', () => {
             reader.readAsDataURL(file);
         });
 
-        updateProcessButton();
-        status.textContent = 'Images selected. Click Process to begin.';
+        updateButtons();
+        const totalFiles = selectedFiles.length;
+        status.textContent = `${totalFiles} image${totalFiles > 1 ? 's' : ''} selected. Click Process to begin.`;
+    }
+
+    function updateButtons() {
+        const hasFiles = selectedFiles.length > 0;
+        processBtn.disabled = !hasFiles;
+        clearBtn.disabled = !hasFiles;
+        processBtn.textContent = `Process Images (${selectedFiles.length})`;
     }
 
     async function processSelectedImages() {
@@ -70,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         processBtn.disabled = true;
         uploadBtn.disabled = true;
+        clearBtn.disabled = true;
         let processed = 0;
         
         for (const file of selectedFiles) {
@@ -98,11 +147,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Reset UI
         selectedFiles = [];
         imagePreview.innerHTML = '';
-        processBtn.disabled = true;
         uploadBtn.disabled = false;
         imageInput.value = '';
         status.textContent = `Completed processing ${processed} images!`;
-        updateProcessButton();
+        updateButtons();
     }
 
     async function loadNotes() {
@@ -178,5 +226,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    imageInput.addEventListener('change', handleFileSelect);
+    function clearAllFiles() {
+        selectedFiles = [];
+        imagePreview.innerHTML = '';
+        updateButtons();
+        status.textContent = 'All images cleared.';
+    }
 });
