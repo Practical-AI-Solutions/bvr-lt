@@ -1,6 +1,8 @@
 // OpenAI Integration
 const OPENAI_API_KEY = window.env.OPENAI_API_KEY;
 const MODEL_NAME = window.env.MODEL_NAME || 'gpt-4o-mini';
+const MAX_TOKENS = 2500;  // Increased token limit
+const TEMPERATURE = 0.3;  // Lower temperature for more focused outputs
 
 export async function processImageWithGPT4(base64Image) {
     try {
@@ -44,7 +46,10 @@ export async function processImageWithGPT4(base64Image) {
                         }
                     }]
                 }],
-                max_tokens: 1000
+                max_tokens: MAX_TOKENS,
+                temperature: TEMPERATURE,
+                presence_penalty: 0.1,  // Slight penalty to prevent repetition
+                frequency_penalty: 0.1   // Slight penalty for frequency
             })
         });
 
@@ -67,7 +72,15 @@ export async function processImageWithGPT4(base64Image) {
                 .trim();
 
             // Parse the JSON response
-            return JSON.parse(cleanContent);
+            const parsedContent = JSON.parse(cleanContent);
+            
+            // Additional validation for longer content
+            if (parsedContent.content && parsedContent.content.length > MAX_TOKENS) {
+                console.warn('Content exceeded max token length, truncating...');
+                parsedContent.content = parsedContent.content.substring(0, MAX_TOKENS);
+            }
+
+            return parsedContent;
         } catch (parseError) {
             console.error('Error parsing GPT response:', parseError);
             return {
