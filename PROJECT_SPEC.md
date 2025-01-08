@@ -1,12 +1,13 @@
 # Brenda's Loose Thoughts (BVR_LT)
 
 ## Overview
-A digital preservation project to convert Brenda's handwritten notes and thoughts into a searchable, organized digital format using GPT-4 for text extraction.
+A digital preservation project to convert Brenda's handwritten notes and thoughts into a searchable, organized digital format using GPT-4 for text extraction and ElevenLabs for text-to-speech.
 
 ## Tech Stack
 - **Frontend**: Vanilla JavaScript, HTML5, CSS3
 - **Database**: Supabase (PostgreSQL)
 - **AI Processing**: OpenAI GPT-4 (specifically gpt-4o-mini model)
+- **Text-to-Speech**: ElevenLabs API (multilingual v2 model)
 - **Markdown Rendering**: Marked.js (via CDN)
 - **Development Server**: Node.js with environment variable injection
 - **Version Control**: Git
@@ -25,7 +26,8 @@ brenda-thoughts/
 ├── package.json           # Project dependencies
 └── services/              # External services
     ├── supabase.js        # Database operations
-    └── openai.js          # GPT-4 integration
+    ├── openai.js          # GPT-4 integration
+    └── elevenlabs.js      # Text-to-speech functionality
 ```
 
 ## Database Schema
@@ -54,6 +56,9 @@ MODEL_NAME=gpt-4o-mini
 # Supabase Configuration
 SUPABASE_URL=https://[PROJECT_ID].supabase.co
 SUPABASE_ANON_KEY=[ANON_KEY]
+
+# ElevenLabs Configuration
+ELEVENLABS_API_KEY=[API_KEY]
 ```
 
 ### Frontend Structure
@@ -76,6 +81,18 @@ SUPABASE_ANON_KEY=[ANON_KEY]
     - type: prayer/quote/lesson
     - year: extracted year or null
 
+### ElevenLabs Integration
+- Model: eleven_multilingual_v2
+- Voice ID: mM1PRloZ2t81CV01YcC2 (custom voice)
+- Features:
+  - Text-to-speech conversion
+  - Automatic markdown stripping
+  - Voice settings:
+    - Stability: 0.75
+    - Similarity boost: 0.75
+  - Error handling and status feedback
+  - Audio resource cleanup
+
 ### Supabase Integration
 - Using REST API with anon key
 - Endpoints:
@@ -91,6 +108,8 @@ SUPABASE_ANON_KEY=[ANON_KEY]
 - Markdown rendering of notes
 - Responsive grid layout
 - Type and year metadata display
+- Text-to-speech playback
+- Note deletion with confirmation
 
 ## Development Setup
 
@@ -114,6 +133,7 @@ SUPABASE_ANON_KEY=[ANON_KEY]
   MODEL_NAME=gpt-4o-mini
   SUPABASE_URL=https://[PROJECT_ID].supabase.co
   SUPABASE_ANON_KEY=[ANON_KEY]
+  ELEVENLABS_API_KEY=[API_KEY]
   ```
 - **.env.example**:
   ```
@@ -121,6 +141,7 @@ SUPABASE_ANON_KEY=[ANON_KEY]
   MODEL_NAME=gpt-4o-mini
   SUPABASE_URL=your_supabase_project_url_here
   SUPABASE_ANON_KEY=your_supabase_anon_key_here
+  ELEVENLABS_API_KEY=your_elevenlabs_api_key_here
   ```
 
 ### Git Configuration
@@ -193,5 +214,6 @@ SUPABASE_ANON_KEY=[ANON_KEY]
 ## Maintenance
 - Regular backups of Supabase database
 - Monitor OpenAI API usage
+- Monitor ElevenLabs API usage and credits
 - Check for security updates
 - Review error logs for issues 

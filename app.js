@@ -229,45 +229,38 @@ document.addEventListener('DOMContentLoaded', () => {
             metadataDiv.appendChild(yearSpan);
         }
 
-        // Add actions container
-        const actionsDiv = document.createElement('div');
-        actionsDiv.className = 'note-actions';
-
         // Add read button
         const readBtn = document.createElement('button');
-        readBtn.className = 'action-btn';
+        readBtn.className = 'read-btn';
         readBtn.innerHTML = '🔊';
         readBtn.title = 'Read note';
         readBtn.onclick = async (e) => {
             e.stopPropagation();
-            const allReadButtons = document.querySelectorAll('.action-btn');
-            allReadButtons.forEach(btn => {
-                btn.disabled = true;
-                btn.classList.remove('reading');
-            });
-            readBtn.classList.add('reading');
-            
             try {
-                // Strip markdown and clean up the text
-                const cleanText = note.content
-                    .replace(/[#*_>`]/g, '') // Remove markdown symbols
-                    .replace(/\n+/g, ' ') // Replace newlines with spaces
-                    .trim();
+                readBtn.disabled = true;
+                readBtn.innerHTML = '🔄';
+                status.textContent = 'Reading note...';
+                
+                // Strip markdown and clean up text for reading
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = marked.parse(note.content);
+                const cleanText = tempDiv.textContent.trim();
                 
                 await readText(cleanText);
+                
+                status.textContent = 'Finished reading note.';
             } catch (error) {
                 console.error('Failed to read note:', error);
-                alert('Failed to read note. Please try again.');
+                status.textContent = 'Failed to read note. Please try again.';
             } finally {
-                allReadButtons.forEach(btn => btn.disabled = false);
-                readBtn.classList.remove('reading');
+                readBtn.disabled = false;
+                readBtn.innerHTML = '🔊';
             }
         };
-        actionsDiv.appendChild(readBtn);
 
         // Add delete button
         const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'action-btn';
+        deleteBtn.className = 'delete-btn';
         deleteBtn.innerHTML = '🗑️';
         deleteBtn.title = 'Delete note';
         deleteBtn.onclick = async (e) => {
@@ -282,11 +275,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         };
-        actionsDiv.appendChild(deleteBtn);
 
         noteDiv.appendChild(contentDiv);
         noteDiv.appendChild(metadataDiv);
-        noteDiv.appendChild(actionsDiv);
+        noteDiv.appendChild(readBtn);
+        noteDiv.appendChild(deleteBtn);
 
         notes.prepend(noteDiv);
     }

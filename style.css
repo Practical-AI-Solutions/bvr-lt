@@ -199,6 +199,7 @@ button:disabled {
     border: 2px solid var(--primary-color);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     position: relative;
+    padding-bottom: calc(var(--spacing) + 30px);
 }
 
 .note:hover {
@@ -252,7 +253,7 @@ button:disabled {
     box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
-.delete-btn {
+.read-btn {
     position: absolute;
     top: 10px;
     right: 10px;
@@ -262,14 +263,36 @@ button:disabled {
     font-size: 1.2rem;
     padding: 5px;
     cursor: pointer;
-    opacity: 0;
-    transition: opacity 0.2s ease, transform 0.2s ease;
     border-radius: 50%;
     width: 32px;
     height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.2s ease;
+    opacity: 1;
+    z-index: 2;
+}
+
+.delete-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    color: var(--primary-color);
+    font-size: 1.2rem;
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    opacity: 0;
+    z-index: 2;
 }
 
 .note:hover .delete-btn {
@@ -373,50 +396,53 @@ button:disabled {
     background: #c0392b;  /* Darker red on hover */
 }
 
-.note-actions {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    display: flex;
-    gap: 8px;
-    opacity: 0;
-    transition: opacity 0.2s ease;
+.note-buttons {
+    display: none;
 }
 
-.note:hover .note-actions {
+.note:hover .note-buttons {
     opacity: 1;
 }
 
-.action-btn {
-    background: transparent;
-    border: none;
-    color: var(--primary-color);
-    font-size: 1.2rem;
-    padding: 5px;
-    cursor: pointer;
-    opacity: 0.8;
-    transition: all 0.2s ease;
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.action-btn:hover {
-    opacity: 1;
+.read-btn:hover,
+.delete-btn:hover {
     background-color: rgba(102, 51, 153, 0.1);
     transform: scale(1.1);
 }
 
-.action-btn.reading {
-    color: var(--tag-bg-color);
-    animation: pulse 1.5s infinite;
+.read-btn:disabled {
+    opacity: 0.5;
+    cursor: wait;
+    transform: none;
 }
 
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
+/* Add tooltip on hover */
+.read-btn::after,
+.delete-btn::after {
+    content: attr(title);
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 8px;
+    background: var(--primary-color);
+    color: white;
+    font-size: 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+
+.read-btn::after {
+    bottom: -25px;
+}
+
+.delete-btn::after {
+    top: -25px;
+}
+
+.read-btn:hover::after,
+.delete-btn:hover::after {
+    opacity: 1;
 }
