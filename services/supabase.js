@@ -43,3 +43,26 @@ export async function getAllNotes() {
 
     return await response.json();
 }
+
+export async function deleteNote(noteId) {
+    try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/notes?id=eq.${noteId}`, {
+            method: 'DELETE',
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`
+            }
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            console.error('Supabase Error:', error);
+            throw new Error(`Failed to delete note: ${error.message || response.statusText}`);
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Delete Error:', error);
+        throw error;
+    }
+}

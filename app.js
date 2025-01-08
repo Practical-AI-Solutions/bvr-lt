@@ -1,5 +1,5 @@
 import { processImageWithGPT4 } from './services/openai.js';
-import { saveNote, getAllNotes } from './services/supabase.js';
+import { saveNote, getAllNotes, deleteNote } from './services/supabase.js';
 
 // Configure marked for safe rendering
 marked.setOptions({
@@ -64,16 +64,54 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function addNoteToUI(note) {
-        const div = document.createElement('div');
-        div.className = 'note';
-        div.innerHTML = `
-            <div class="note-content">${marked.parse(note.content)}</div>
-            <div class="metadata">
-                <span class="type">${note.type}</span>
-                ${note.year ? `<span class="year">${note.year}</span>` : ''}
-            </div>
-        `;
-        notes.prepend(div);
+        const noteDiv = document.createElement('div');
+        noteDiv.className = 'note';
+        noteDiv.dataset.noteId = note.id;  // Store the note ID
+
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'note-content';
+        contentDiv.innerHTML = marked.parse(note.content);
+
+        const metadataDiv = document.createElement('div');
+        metadataDiv.className = 'metadata';
+
+        if (note.type) {
+            const typeSpan = document.createElement('span');
+            typeSpan.className = 'type';
+            typeSpan.textContent = note.type;
+            metadataDiv.appendChild(typeSpan);
+        }
+
+        if (note.year) {
+            const yearSpan = document.createElement('span');
+            yearSpan.className = 'year';
+            yearSpan.textContent = note.year;
+            metadataDiv.appendChild(yearSpan);
+        }
+
+        // Add delete button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.innerHTML = '🗑️';
+        deleteBtn.title = 'Delete note';
+        deleteBtn.onclick = async (e) => {
+            e.stopPropagation();
+            if (confirm('Are you sure you want to delete this note?')) {
+                try {
+                    await deleteNote(note.id);
+                    noteDiv.remove();
+                } catch (error) {
+                    console.error('Failed to delete note:', error);
+                    alert('Failed to delete note. Please try again.');
+                }
+            }
+        };
+
+        noteDiv.appendChild(contentDiv);
+        noteDiv.appendChild(metadataDiv);
+        noteDiv.appendChild(deleteBtn);
+
+        notes.prepend(noteDiv);
     }
 
     function fileToBase64(file) {
