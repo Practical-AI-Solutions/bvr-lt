@@ -241,6 +241,37 @@ document.addEventListener('DOMContentLoaded', () => {
             imagePreview.src = note.image_url;
             imagePreview.alt = 'Note Image';
             imagePreview.className = 'note-image';
+            imagePreview.onclick = () => {
+                const fullImage = document.createElement('img');
+                fullImage.src = note.image_url;
+                fullImage.style.position = 'fixed';
+                fullImage.style.top = '50%';
+                fullImage.style.left = '50%';
+                fullImage.style.transform = 'translate(-50%, -50%)';
+                fullImage.style.maxWidth = '90%';
+                fullImage.style.maxHeight = '90%';
+                fullImage.style.zIndex = '1000';
+                fullImage.style.borderRadius = '8px';
+                fullImage.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+                fullImage.style.backgroundColor = 'white';
+
+                const overlay = document.createElement('div');
+                overlay.style.position = 'fixed';
+                overlay.style.top = '0';
+                overlay.style.left = '0';
+                overlay.style.width = '100%';
+                overlay.style.height = '100%';
+                overlay.style.backgroundColor = 'rgba(0,0,0,0.5)';
+                overlay.style.zIndex = '999';
+
+                overlay.onclick = () => {
+                    document.body.removeChild(fullImage);
+                    document.body.removeChild(overlay);
+                };
+
+                document.body.appendChild(overlay);
+                document.body.appendChild(fullImage);
+            };
             noteDiv.appendChild(imagePreview);
         }
 

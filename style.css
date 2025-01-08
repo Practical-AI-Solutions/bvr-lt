@@ -448,9 +448,9 @@ button:disabled {
 }
 
 .note-image {
-    width: 100%;
+    width: 100px;
     height: auto;
-    max-height: 200px;
+    max-height: 100px;
     object-fit: cover;
     border-radius: var(--border-radius);
     margin-bottom: var(--spacing);
