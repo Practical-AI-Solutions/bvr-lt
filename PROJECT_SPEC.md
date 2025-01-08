@@ -98,6 +98,7 @@ ELEVENLABS_API_KEY=[API_KEY]
 - Endpoints:
   - POST /rest/v1/notes - Create new note
   - GET /rest/v1/notes?select=* - Fetch all notes
+  - **Storage**: Upload images to `notes` bucket
 - Notes are ordered by created_at DESC
 - Error handling includes detailed logging
 
@@ -217,3 +218,17 @@ ELEVENLABS_API_KEY=[API_KEY]
 - Monitor ElevenLabs API usage and credits
 - Check for security updates
 - Review error logs for issues 
+
+### Image Storage and Policy Changes
+- Added `image_url` column to `notes` table to store image references.
+- Configured Supabase Storage with a public bucket named `notes`.
+- Implemented a policy to allow all uploads to the `notes` bucket.
+
+### Supabase Integration
+- Using REST API with anon key
+- Endpoints:
+  - POST /rest/v1/notes - Create new note
+  - GET /rest/v1/notes?select=* - Fetch all notes
+  - **Storage**: Upload images to `notes` bucket
+- Notes are ordered by created_at DESC
+- Error handling includes detailed logging 

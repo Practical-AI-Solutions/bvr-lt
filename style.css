@@ -446,3 +446,18 @@ button:disabled {
 .delete-btn:hover::after {
     opacity: 1;
 }
+
+.note-image {
+    width: 100%;
+    height: auto;
+    max-height: 200px;
+    object-fit: cover;
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.note-image:hover {
+    transform: scale(1.05);
+}

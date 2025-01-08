@@ -2,6 +2,35 @@
 const SUPABASE_URL = window.env.SUPABASE_URL;
 const SUPABASE_KEY = window.env.SUPABASE_ANON_KEY;
 
+// Upload image to Supabase Storage
+export async function uploadImage(file) {
+    try {
+        const timestamp = new Date().getTime();
+        const fileName = `${timestamp}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+        
+        const response = await fetch(`${SUPABASE_URL}/storage/v1/object/notes/${fileName}`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`
+            },
+            body: file
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            console.error('Supabase Storage Error:', error);
+            throw new Error(`Failed to upload image: ${error.message || response.statusText}`);
+        }
+
+        // Return the public URL for the uploaded image
+        return `${SUPABASE_URL}/storage/v1/object/public/notes/${fileName}`;
+    } catch (error) {
+        console.error('Upload Error:', error);
+        throw error;
+    }
+}
+
 export async function saveNote(noteData) {
     const response = await fetch(`${SUPABASE_URL}/rest/v1/notes`, {
         method: 'POST',
@@ -14,7 +43,8 @@ export async function saveNote(noteData) {
         body: JSON.stringify({
             content: noteData.content,
             type: noteData.type || 'unknown',
-            year: noteData.year ? parseInt(noteData.year) : null
+            year: noteData.year ? parseInt(noteData.year) : null,
+            image_url: noteData.image_url || null
         })
     });
 

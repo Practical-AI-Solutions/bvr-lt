@@ -1,5 +1,5 @@
 import { processImageWithGPT4 } from './services/openai.js';
-import { saveNote, getAllNotes, deleteNote } from './services/supabase.js';
+import { saveNote, getAllNotes, deleteNote, uploadImage } from './services/supabase.js';
 import { readText } from './services/elevenlabs.js';
 
 // Configure marked for safe rendering
@@ -163,12 +163,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 status.textContent = `Processing ${file.name}... (${processed + 1}/${selectedFiles.length})`;
                 console.log(`Processing ${file.name}`);
 
+                // Upload image to Supabase Storage
+                const imageUrl = await uploadImage(file);
+                console.log('Image uploaded to Supabase Storage:', imageUrl);
+
                 const base64 = await fileToBase64(file);
                 console.log('Image converted to base64');
 
                 const noteData = await processImageWithGPT4(base64);
                 console.log('GPT-4 Response:', noteData);
 
+                // Save note with image URL
+                noteData.image_url = imageUrl;
                 await saveNote(noteData);
                 console.log('Note saved to database');
 
@@ -227,6 +233,15 @@ document.addEventListener('DOMContentLoaded', () => {
             yearSpan.className = 'year';
             yearSpan.textContent = note.year;
             metadataDiv.appendChild(yearSpan);
+        }
+
+        // Add image preview
+        if (note.image_url) {
+            const imagePreview = document.createElement('img');
+            imagePreview.src = note.image_url;
+            imagePreview.alt = 'Note Image';
+            imagePreview.className = 'note-image';
+            noteDiv.appendChild(imagePreview);
         }
 
         // Add read button
